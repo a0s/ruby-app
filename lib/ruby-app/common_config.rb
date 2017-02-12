@@ -2,6 +2,7 @@
 
 class RubyAppAddress
   attr_accessor :host, :port
+
   def initialize(host, port)
     @host = host
     @port = port
@@ -19,6 +20,14 @@ class CommonConfig
     s = Scope.new
     s.instance_eval(&block)
     @@configs.merge!(s.configs)
+  end
+
+  def self.load_env
+    h = {}
+    ENV.each do |k, v|
+      h[k.downcase.to_sym] = v
+    end
+    @@configs.merge!(h)
   end
 
   def self.load(config_file, shouldbe = false)
@@ -40,7 +49,7 @@ class CommonConfig
   end
 
   def self.save(filename)
-    File.open(filename, 'w'){|f| f.write YAML.dump(@@configs) }
+    File.open(filename, 'w') { |f| f.write YAML.dump(@@configs) }
   end
 
   class Scope
@@ -50,7 +59,7 @@ class CommonConfig
 
     attr_reader :configs
 
-  private
+    private
 
     def method_missing(name, *params, &block)
       if name.to_s =~ /_address$/i

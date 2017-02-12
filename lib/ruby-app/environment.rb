@@ -24,7 +24,7 @@ Bundler.require(:default, App.env.to_sym)
 # i prefer 2.seconds, or x.blank? functions by default
 require 'active_support/version'
 if ActiveSupport::VERSION::MAJOR >= 5
-  require 'active_support' 
+  require 'active_support'
 end
 require 'active_support/dependencies'
 require 'active_support/core_ext/numeric/time'
@@ -39,19 +39,20 @@ Bundler.require(App.bundler_group, "#{App.bundler_group}_#{App.env}") if App.bun
 # for free usless data from bundler and gems
 GC.start
 
-# default config from app
-require File.join(App.root, %w{config config})
+# global config
+global_rb = File.join(App.root, %w{config config})
+require global_rb if File.exist?("#{global_rb}.rb")
 
-# Load configs from yaml
 CommonConfig.load(File.join(App.root, %w{config config.yml}))
-CommonConfig.load(File.join(App.root, ['config', "config.yml.#{App.env}"]))
 
-# configs from app for env
-begin
-  require File.join(App.root, %W( config environments #{App.env}))
-rescue LoadError
-  raise "unknown env #{App.env}"
-end
+# environment config
+environment_rb = File.join(App.root, %W(config environments #{App.env}))
+require environment_rb if File.exist?("#{environment_rb}.rb")
+
+CommonConfig.load(File.join(App.root, %W(config environments #{App.env}.yml)))
+
+# config from env variables
+CommonConfig.load_env
 
 # unshift lib app
 # $:.unshift(File.join(App.root, 'lib'))
@@ -77,11 +78,11 @@ unless App.initializer_paths.empty?
 end
 
 # load initializers app
-Dir["#{App.root}/config/initializers/**/*.rb"].each{ |x| load(x) }
+Dir["#{App.root}/config/initializers/**/*.rb"].each { |x| load(x) }
 
 # first load models app
-Dir["#{App.root}/app/models/**/*.rb"].each{ |x| require x }
+Dir["#{App.root}/app/models/**/*.rb"].each { |x| require x }
 
 # later controllers app
-Dir["#{App.root}/app/controllers/**/*.rb"].each{ |x| require x }
+Dir["#{App.root}/app/controllers/**/*.rb"].each { |x| require x }
 
