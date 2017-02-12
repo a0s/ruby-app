@@ -25,7 +25,19 @@ class CommonConfig
   def self.load_env
     h = {}
     ENV.each do |k, v|
-      h[k.downcase.to_sym] = v
+      h[k.downcase.to_sym] =
+          case v
+            when 'false'
+              false
+            when 'true'
+              true
+            when v.to_i.to_s
+              v.to_i
+            when v.to_f.to_s
+              v.to_f
+            else
+              v
+          end
     end
     @@configs.merge!(h)
   end
