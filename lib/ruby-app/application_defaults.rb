@@ -14,7 +14,7 @@ module Application::Defaults
 
   def env
     @gem_env ||= begin
-      env = ENV['APP_ENV'] || ENV['RAILS_ENV']
+      env = ENV['APP_ENV'] || ENV['RACK_ENV'] || ENV['RAILS_ENV']
 
       # if not specify env, try find file with env config/environment.current
       # which created this file by a capistrano, by example
